@@ -15,16 +15,14 @@ type Shop = {
 };
 
 export default function HomePage() {
-  const [search, setSearch]   = useState("");
-  const [shops, setShops]     = useState<Shop[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [search, setSearch]     = useState("");
+  const [shops, setShops]       = useState<Shop[]>([]);
+  const [loading, setLoading]   = useState(false);
   const [searched, setSearched] = useState(false);
-  const [error, setError]     = useState("");
+  const [error, setError]       = useState("");
 
   async function handleSearch() {
     const term = search.trim();
-
-    // Guard — nothing typed
     if (!term) {
       setError("Please enter a city or postcode.");
       return;
@@ -36,18 +34,13 @@ export default function HomePage() {
     setSearched(false);
 
     try {
-      // Decide whether it looks like a postcode (e.g. M1, SW1A) or a city name
       const looksLikePostcode = /^[A-Za-z]{1,2}\d/i.test(term);
       const url = looksLikePostcode
         ? `/api/shops?postcode=${encodeURIComponent(term)}`
         : `/api/shops?city=${encodeURIComponent(term)}`;
 
-      console.log("Fetching:", url); // ← you will see this in browser console
-
       const response = await fetch(url);
       const data = await response.json();
-
-      console.log("Response:", data); // ← you will see this in browser console
 
       if (!response.ok) {
         setError(data.error || "Search failed.");
@@ -66,7 +59,7 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-gray-50">
 
-      {/* ── Hero / search bar ── */}
+      {/* Hero / search bar */}
       <div className="bg-gray-900 text-white py-16 px-4">
         <div className="max-w-2xl mx-auto text-center">
           <h1 className="text-4xl font-bold mb-2">Book a barber or salon</h1>
@@ -96,22 +89,23 @@ export default function HomePage() {
             </button>
           </div>
 
-          {/* Inline error shown right below the search bar */}
           {error && (
             <p className="mt-3 text-red-300 text-sm">{error}</p>
           )}
         </div>
       </div>
 
-      {/* ── Results ── */}
+      {/* Results */}
       <div className="max-w-2xl mx-auto px-4 py-10">
 
         {/* Loading skeleton */}
         {loading && (
           <div className="space-y-4">
             {[1, 2].map((n) => (
-              <div key={n} className="bg-white rounded-2xl border border-gray-100 p-5
-                                      animate-pulse h-24" />
+              <div
+                key={n}
+                className="bg-white rounded-2xl border border-gray-100 p-5 animate-pulse h-24"
+              />
             ))}
           </div>
         )}
@@ -119,8 +113,8 @@ export default function HomePage() {
         {/* No results */}
         {searched && !loading && shops.length === 0 && !error && (
           <div className="text-center text-gray-400 py-12">
-            <p className="text-lg font-medium">No shops found near "{search}"</p>
-            <p className="text-sm mt-1">Try "Manchester" or a postcode like "M1"</p>
+            <p className="text-lg font-medium">No shops found near &quot;{search}&quot;</p>
+            <p className="text-sm mt-1">Try &quot;Manchester&quot; or a postcode like &quot;M1&quot;</p>
           </div>
         )}
 
@@ -139,7 +133,6 @@ export default function HomePage() {
                            hover:shadow-md hover:border-gray-300 transition-all"
               >
                 <div className="flex items-start justify-between gap-4">
-                  {/* Left — icon + info */}
                   <div className="flex gap-4 items-start">
                     <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center
                                     justify-center text-2xl flex-shrink-0">
@@ -157,7 +150,6 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  {/* Right — availability */}
                   <div className="flex-shrink-0 text-right">
                     {shop._count.slots > 0 ? (
                       <span className="inline-block bg-green-50 text-green-700 text-xs
@@ -180,27 +172,32 @@ export default function HomePage() {
           </div>
         )}
 
-{/* Default state — before any search */}
-{!searched && !loading && (
-  <div className="text-center text-gray-400 py-12">
-    <p className="text-5xl mb-4">✂️</p>
-    <p className="text-sm">Search above to find shops near you</p>
+        {/* Default state — before first search */}
+        {!searched && !loading && (
+          <div className="text-center text-gray-400 py-12">
+            <p className="text-5xl mb-4">✂️</p>
+            <p className="text-sm">Search above to find shops near you</p>
 
-    {/* Call to action for shop owners */}
-    <div className="mt-10 pt-10 border-t border-gray-100">
-      <p className="text-sm font-medium text-gray-500 mb-1">
-        Are you a barber or salon owner?
-      </p>
-      <p className="text-xs text-gray-400 mb-4">
-        Get your own booking page — free to set up
-      </p>
-      <Link
-        href="/register"
-        className="inline-block bg-gray-900 text-white text-sm font-semibold
-                   px-6 py-3 rounded-xl hover:bg-gray-700 transition-colors"
-      >
-        List your shop →
-      </Link>
-    </div>
-  </div>
-)}
+            {/* Call to action for shop owners */}
+            <div className="mt-10 pt-10 border-t border-gray-100">
+              <p className="text-sm font-medium text-gray-500 mb-1">
+                Are you a barber or salon owner?
+              </p>
+              <p className="text-xs text-gray-400 mb-4">
+                Get your own booking page — free to set up
+              </p>
+              <Link
+                href="/register"
+                className="inline-block bg-gray-900 text-white text-sm font-semibold
+                           px-6 py-3 rounded-xl hover:bg-gray-700 transition-colors"
+              >
+                List your shop →
+              </Link>
+            </div>
+          </div>
+        )}
+
+      </div>
+    </main>
+  );
+}
