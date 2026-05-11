@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// A shop — barber or beauty parlour
+model Shop {
+  id        String    @id @default(cuid())
+  name      String
+  type      String    // "barber" or "beauty"
+  address   String
+  postcode  String
+  city      String
+  phone     String?
+  createdAt DateTime  @default(now())
+
+  services  Service[]
+  slots     Slot[]
+
+  @@index([postcode])
+  @@index([city])
+}
+
+// A service a shop offers — e.g. "Haircut £15, 30 mins"
+model Service {
+  id          String   @id @default(cuid())
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  name        String   // "Haircut", "Beard Trim"
+  pricePence  Int      // Store as pence — 1500 = £15.00
+  durationMin Int      // How long in minutes
+
+  bookings    Booking[]
+}
+
+// A time slot the shop owner creates — e.g. "Tuesday 10:00"
+model Slot {
+  id        String   @id @default(cuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  date      String   // "2025-06-15"
+  time      String   // "10:00"
+  isBooked  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  booking   Booking?
+
+  @@unique([shopId, date, time])
+  @@index([shopId, date])
+}
+
+// A booking — links a customer to a slot and service
+model Booking {
+  id            String   @id @default(cuid())
+  slotId        String   @unique
+  slot          Slot     @relation(fields: [slotId], references: [id])
+  serviceId     String
+  service       Service  @relation(fields: [serviceId], references: [id])
+  customerName  String
+  customerEmail String
+  customerPhone String
+  status        String   @default("confirmed") // confirmed / cancelled
+  createdAt     DateTime @default(now())
+}
+
+// Admin user — shop owners who log in to the dashboard
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  shopId       String
+  createdAt    DateTime @default(now())
+}
